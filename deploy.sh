@@ -87,6 +87,7 @@ echo "  Grafana    : http://localhost:3001"
 echo "  Backend    : http://localhost:5000"
 echo "  Frontend   : http://localhost:5173"
 
+
 echo
 warn "Check that backend and frontend are defined in docker-compose.yml"
 warn "for a complete MERN deployment. This script does not deploy Kubernetes or Terraform."
