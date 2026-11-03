@@ -20,7 +20,7 @@ jobs:
           node-version: '20'
 
       - name: Install frontend dependencies
-        working-directory: Brontend
+        working-directory: Frontend
         run: npm ci
 
       - name: Install backend dependencies
