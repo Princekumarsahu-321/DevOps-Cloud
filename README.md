@@ -6,6 +6,7 @@ A DevOps-focused MERN stack project designed to automate application development
 
 This project aims to build an end-to-end deployment workflow for a MERN (MongoDB, Express.js, React.js, Node.js) application. It combines containerization, CI/CD automation, Kubernetes orchestration, and Infrastructure as Code (IaC) to create a scalable and maintainable deployment environment.
 
+
 ## Project Objectives
 
 - Containerize the application using Docker.
