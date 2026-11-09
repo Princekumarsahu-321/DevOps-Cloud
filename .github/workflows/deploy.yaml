@@ -1,0 +1,65 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["Docker Build"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the built revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Configure kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure cluster credentials
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        shell: bash
+        run: |
+          if [[ -z "$KUBE_CONFIG" ]]; then
+            echo "KUBE_CONFIG must contain the target cluster kubeconfig." >&2
+            exit 1
+          fi
+          mkdir -p "$HOME/.kube"
+          printf '%s' "$KUBE_CONFIG" > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Apply Kubernetes resources
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -n mern-app \
+            -f k8s/configmap.yaml \
+            -f k8s/deployment.yaml \
+            -f k8s/service.yaml \
+            -f k8s/hpa.yaml
+
+      - name: Deploy immutable images
+        env:
+          DEPLOY_SHA: ${{ github.event.workflow_run.head_sha }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          image_owner="$(printf '%s' "$REPOSITORY" | cut -d/ -f1 | tr '[:upper:]' '[:lower:]')"
+          kubectl set image -n mern-app deployment/backend \
+            backend="ghcr.io/${image_owner}/mern-backend:sha-${DEPLOY_SHA}"
+          kubectl set image -n mern-app deployment/frontend \
+            frontend="ghcr.io/${image_owner}/mern-frontend:sha-${DEPLOY_SHA}"
+          kubectl rollout status -n mern-app deployment/backend --timeout=180s
+          kubectl rollout status -n mern-app deployment/frontend --timeout=180s

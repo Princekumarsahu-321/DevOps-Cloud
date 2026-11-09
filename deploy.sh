@@ -4,7 +4,7 @@ set -Eeuo pipefail
 
 # ==========================================
 # MERN Project Deployment Script
-# Docker Compose + Prometheus Monitoring
+# Docker Compose + Prometheus + Grafana
 # ==========================================
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -43,11 +43,11 @@ docker compose version >/dev/null 2>&1 ||
 # Step 2: Check project files
 log "Checking project files..."
 
-[[ -f docker-compose.yml ]] ||
-    error "docker-compose.yml not found."
+[[ -f docker-compose.yaml ]] ||
+    error "docker-compose.yaml not found."
 
-[[ -f prometheus-config.yaml ]] ||
-    warn "prometheus-config.yaml not found. Check your monitoring configuration."
+[[ -f monitoring/prometheus.yml ]] ||
+    error "monitoring/prometheus.yml not found."
 
 # Step 3: Validate Docker Compose configuration
 log "Validating Docker Compose configuration..."
@@ -58,24 +58,10 @@ docker compose config --quiet ||
 log "Building images and starting Compose services..."
 docker compose up -d --build
 
-# Step 5: Start existing optional containers, if present
-for container in backend frontend grafana; do
-    if docker container inspect "$container" >/dev/null 2>&1; then
-        state="$(docker inspect -f '{{.State.Status}}' "$container")"
-
-        if [[ "$state" != "running" ]]; then
-            log "Starting existing container: $container"
-            docker start "$container" >/dev/null
-        else
-            log "$container is already running."
-        fi
-    fi
-done
-
-# Step 6: Display deployment status
+# Step 5: Display deployment status
 echo
 log "Container status:"
-docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+docker compose ps
 
 echo
 log "Deployment script completed."
@@ -86,7 +72,5 @@ echo "  Prometheus : http://localhost:9090"
 echo "  Grafana    : http://localhost:3001"
 echo "  Backend    : http://localhost:5000"
 echo "  Frontend   : http://localhost:5173"
-
 echo
-warn "Check that backend and frontend are defined in docker-compose.yml"
-warn "for a complete MERN deployment. This script does not deploy Kubernetes or Terraform."
+warn "Grafana's default local password is change-me-now; set GRAFANA_ADMIN_PASSWORD before deployment."

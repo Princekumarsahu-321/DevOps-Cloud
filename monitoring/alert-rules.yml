@@ -1,0 +1,20 @@
+groups:
+  - name: mern-app
+    rules:
+      - alert: BackendUnavailable
+        expr: up{job="backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: MERN backend is unavailable
+          description: Prometheus has been unable to scrape the backend for one minute.
+
+      - alert: BackendHighMemory
+        expr: process_resident_memory_bytes{job="backend"} > 500000000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: MERN backend memory usage is high
+          description: Backend resident memory has exceeded 500 MB for five minutes.
