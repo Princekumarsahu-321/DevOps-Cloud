@@ -42,24 +42,22 @@ jobs:
           chmod 600 "$HOME/.kube/config"
 
       - name: Apply Kubernetes resources
-        run: |
-          kubectl apply -f k8s/namespace.yaml
-          kubectl apply -n mern-app \
-            -f k8s/configmap.yaml \
-            -f k8s/deployment.yaml \
-            -f k8s/service.yaml \
-            -f k8s/hpa.yaml
-
-      - name: Deploy immutable images
         env:
           DEPLOY_SHA: ${{ github.event.workflow_run.head_sha }}
           REPOSITORY: ${{ github.repository }}
         shell: bash
         run: |
+          set -euo pipefail
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -n mern-app \
+            -f k8s/configmap.yaml \
+            -f k8s/service.yaml \
+            -f k8s/hpa.yaml
           image_owner="$(printf '%s' "$REPOSITORY" | cut -d/ -f1 | tr '[:upper:]' '[:lower:]')"
-          kubectl set image -n mern-app deployment/backend \
-            backend="ghcr.io/${image_owner}/mern-backend:sha-${DEPLOY_SHA}"
-          kubectl set image -n mern-app deployment/frontend \
-            frontend="ghcr.io/${image_owner}/mern-frontend:sha-${DEPLOY_SHA}"
+          sed \
+            -e "s|ghcr.io/your-org|ghcr.io/${image_owner}|g" \
+            -e "s|:latest|:sha-${DEPLOY_SHA}|g" \
+            k8s/deployment.yaml |
+            kubectl apply -n mern-app -f -
           kubectl rollout status -n mern-app deployment/backend --timeout=180s
           kubectl rollout status -n mern-app deployment/frontend --timeout=180s
