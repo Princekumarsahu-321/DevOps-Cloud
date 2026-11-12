@@ -1,4 +1,4 @@
-# 🚀 DevOps-Cloud | End-to-End MERN DevOps Platform
+# 🚀 End-to-End DevOps Automation Platform
 
 ![DevOps](https://img.shields.io/badge/Domain-DevOps-blue)
 ![Docker](https://img.shields.io/badge/Docker-Containerization-2496ED?logo=docker&logoColor=white)
