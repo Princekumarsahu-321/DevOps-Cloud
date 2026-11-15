@@ -1,0 +1,21 @@
+
+apiVersion: v1
+kind: ResourceQuota
+
+metadata:
+  name: mern-resource-quota
+  namespace: mern-app
+
+spec:
+  hard:
+    requests.cpu: "2"
+    requests.memory: 2Gi
+
+    limits.cpu: "4"
+    limits.memory: 4Gi
+
+    pods: "20"
+    services: "10"
+    configmaps: "20"
+    secrets: "20"
+    persistentvolumeclaims: "5"

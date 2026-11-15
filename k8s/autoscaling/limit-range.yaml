@@ -1,0 +1,27 @@
+
+apiVersion: v1
+kind: LimitRange
+
+metadata:
+  name: mern-limit-range
+  namespace: mern-app
+
+spec:
+  limits:
+    - type: Container
+
+      min:
+        cpu: 50m
+        memory: 64Mi
+
+      max:
+        cpu: "1"
+        memory: 1Gi
+
+      defaultRequest:
+        cpu: 100m
+        memory: 128Mi
+
+      default:
+        cpu: 500m
+        memory: 512Mi
