@@ -9,6 +9,6 @@ metadata:
 spec:
   minAvailable: 1
 
-  selector:
-    matchLabels:
-      app: backend
+selector:
+  matchLabels:
+    app.kubernetes.io/name: backend
