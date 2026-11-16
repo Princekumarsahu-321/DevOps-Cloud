@@ -17,7 +17,7 @@ variable "instance_type" {
 
 variable "key_name" {
   description = "Optional existing EC2 key pair name."
-  type        = string
+  type        = string 
   default     = null
 }
 
