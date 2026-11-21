@@ -73,4 +73,4 @@ echo "  Grafana    : http://localhost:3001"
 echo "  Backend    : http://localhost:5000"
 echo "  Frontend   : http://localhost:5173"
 echo
-warn "Grafana's default local password is change-me-now; set GRAFANA_ADMIN_PASSWORD before deployment."
+warn "Grafana's default local password is change-me-now; set GRAFANA_ADMIN_PASSWORD before deployment."  
